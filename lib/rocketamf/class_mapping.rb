@@ -119,6 +119,11 @@ module RocketAMF
       # Global configuration variable for sending Arrays as ArrayCollections.
       # Defaults to false.
       attr_accessor :use_array_collection
+      
+      # If enabled, properties will be converted to
+      # underscore style on deserialization from actionscript and will be converted
+      # to camelcase on serialization.
+      attr_accessor :translate_case
 
       # Returns the mapping set with all the class mappings that is currently
       # being used.
@@ -143,6 +148,7 @@ module RocketAMF
       def reset
         @use_array_collection = false
         @mappings = nil
+        @translate_case = false
       end
     end
 
@@ -152,6 +158,7 @@ module RocketAMF
     def initialize
       @mappings = self.class.mappings
       @use_array_collection = self.class.use_array_collection === true
+      @translate_case = self.class.translate_case === true
     end
 
     # Returns the ActionScript class name for the given ruby object. Will also
@@ -196,6 +203,12 @@ module RocketAMF
         obj.merge! props
         return obj
       end
+      
+      if ClassMapper.translate_case && !obj.is_a?(RocketAMF::Values::AbstractMessage)
+        case_translator = lambda {|injected, pair| injected[pair[0].to_s.underscore.to_sym] = pair[1]; injected}
+        props = props.inject({}, &case_translator)
+        dynamic_props = dynamic_props.inject({}, &case_translator) if dynamic_props
+      end
 
       # Some type of object
       hash_like = obj.respond_to?("[]=")
@@ -231,6 +244,7 @@ module RocketAMF
         method_def = ruby_obj.method(method_name)
         props[method_name.to_s] = ruby_obj.send(method_name) if method_def.arity == 0
       end
+    
       props
     end
   end
