@@ -202,6 +202,14 @@ module RocketAMF
       if obj.is_a?(Values::TypedHash)
         obj.merge! props
         return obj
+      elsif obj.respond_to? :new_record?
+        # Determine whether or not we have a new object.
+        obj.instance_variable_set(:@new_record, false)
+
+        if obj.id.is_a?(Numeric) && obj.id.to_i.zero?
+          obj.id = nil
+          obj.instance_variable_set(:@new_record, true)
+        end
       end
       
       if ClassMapper.translate_case && !obj.is_a?(RocketAMF::Values::AbstractMessage)
