@@ -212,7 +212,7 @@ module RocketAMF
         end
       end
       
-      if ClassMapper.translate_case && !obj.is_a?(RocketAMF::Values::AbstractMessage)
+      if RocketAMF::ClassMapper.translate_case && !obj.is_a?(RocketAMF::Values::AbstractMessage)
         case_translator = lambda {|injected, pair| injected[pair[0].to_s.underscore.to_sym] = pair[1]; injected}
         props = props.inject({}, &case_translator)
         dynamic_props = dynamic_props.inject({}, &case_translator) if dynamic_props

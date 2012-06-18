@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'rake'
-require 'rake/rdoctask'
+require 'rdoc/task'
 require 'rake/gempackagetask'
 require 'rspec/core/rake_task'
 require 'rake/extensiontask'
