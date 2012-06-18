@@ -161,15 +161,29 @@ module RocketAMF
     def to_s
       serialize
     end
-
-    def dispatch_call p #:nodoc:
+    
+    def dispatch_call p
       begin
-        p[:block].call(p[:method], p[:args])
+        ret = p[:block].call(p[:method], p[:args])
+        raise ret if ret.is_a?(Exception) # If they return FaultObject like you could in rubyamf_plugin
+        ret
       rescue Exception => e
+        # Clear backtrace so that RocketAMF doesn't send back the full backtrace
+        e.set_backtrace([])
+
         # Create ErrorMessage object using the source message as the base
-        Values::ErrorMessage.new(p[:source], e)
+        RocketAMF::Values::ErrorMessage.new(p[:source], e)
       end
     end
+
+    # def dispatch_call p #:nodoc:
+    #   begin
+    #     p[:block].call(p[:method], p[:args])
+    #   rescue Exception => e
+    #     # Create ErrorMessage object using the source message as the base
+    #     Values::ErrorMessage.new(p[:source], e)
+    #   end
+    # end
   end
 
   # RocketAMF::Envelope header
