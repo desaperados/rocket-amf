@@ -168,9 +168,6 @@ module RocketAMF
         raise ret if ret.is_a?(Exception) # If they return FaultObject like you could in rubyamf_plugin
         ret
       rescue Exception => e
-        # Clear backtrace so that RocketAMF doesn't send back the full backtrace
-        e.set_backtrace([])
-
         # Create ErrorMessage object using the source message as the base
         RocketAMF::Values::ErrorMessage.new(p[:source], e)
       end
